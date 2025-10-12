@@ -1,12 +1,57 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35506.116 d17.12
+VisualStudioVersion = 17.12.35506.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F17F4C72-2C56-484C-A785-B571998CF21B}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "ERP.Purchasing.SQL", "src\ERP.Purchasing.SQL\ERP.Purchasing.SQL.sqlproj", "{DD3DE60E-C2A6-408C-B0B5-D07E4AA9D463}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ERP.Purchasing.Domain", "src\ERP.Purchasing.Domain\ERP.Purchasing.Domain.csproj", "{4B1936F4-7263-4B2D-B7A0-67C6EA995355}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ERP.Purchasing.Application", "src\ERP.Purchasing.Application\ERP.Purchasing.Application.csproj", "{0438F202-E9A9-48AE-9C2D-155E92FF46E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ERP.Purchasing.Infrastructure", "src\ERP.Purchasing.Infrastructure\ERP.Purchasing.Infrastructure.csproj", "{4FDCC13D-4A07-41D8-BCAE-8878B42200E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ERP.Purchasing.API", "src\ERP.Purchasing.API\ERP.Purchasing.API.csproj", "{7A2EA0B5-0B9E-4E32-AD51-07C5579D51B3}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DD3DE60E-C2A6-408C-B0B5-D07E4AA9D463}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD3DE60E-C2A6-408C-B0B5-D07E4AA9D463}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD3DE60E-C2A6-408C-B0B5-D07E4AA9D463}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{DD3DE60E-C2A6-408C-B0B5-D07E4AA9D463}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD3DE60E-C2A6-408C-B0B5-D07E4AA9D463}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD3DE60E-C2A6-408C-B0B5-D07E4AA9D463}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{4B1936F4-7263-4B2D-B7A0-67C6EA995355}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B1936F4-7263-4B2D-B7A0-67C6EA995355}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B1936F4-7263-4B2D-B7A0-67C6EA995355}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B1936F4-7263-4B2D-B7A0-67C6EA995355}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0438F202-E9A9-48AE-9C2D-155E92FF46E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0438F202-E9A9-48AE-9C2D-155E92FF46E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0438F202-E9A9-48AE-9C2D-155E92FF46E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0438F202-E9A9-48AE-9C2D-155E92FF46E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FDCC13D-4A07-41D8-BCAE-8878B42200E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FDCC13D-4A07-41D8-BCAE-8878B42200E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FDCC13D-4A07-41D8-BCAE-8878B42200E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FDCC13D-4A07-41D8-BCAE-8878B42200E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A2EA0B5-0B9E-4E32-AD51-07C5579D51B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A2EA0B5-0B9E-4E32-AD51-07C5579D51B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A2EA0B5-0B9E-4E32-AD51-07C5579D51B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A2EA0B5-0B9E-4E32-AD51-07C5579D51B3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DD3DE60E-C2A6-408C-B0B5-D07E4AA9D463} = {F17F4C72-2C56-484C-A785-B571998CF21B}
+		{4B1936F4-7263-4B2D-B7A0-67C6EA995355} = {F17F4C72-2C56-484C-A785-B571998CF21B}
+		{0438F202-E9A9-48AE-9C2D-155E92FF46E9} = {F17F4C72-2C56-484C-A785-B571998CF21B}
+		{4FDCC13D-4A07-41D8-BCAE-8878B42200E1} = {F17F4C72-2C56-484C-A785-B571998CF21B}
+		{7A2EA0B5-0B9E-4E32-AD51-07C5579D51B3} = {F17F4C72-2C56-484C-A785-B571998CF21B}
 	EndGlobalSection
 EndGlobal
