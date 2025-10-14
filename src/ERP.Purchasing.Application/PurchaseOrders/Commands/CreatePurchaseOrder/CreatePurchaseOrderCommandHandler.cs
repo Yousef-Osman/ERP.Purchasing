@@ -41,7 +41,7 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
             _logger.LogInformation("Creating new purchase order");
 
             // Create purchase order
-            var purchaseOrder = _domainService.CreatePurchaseOrder(request.IssueDate, request.NumberGenerationStrategy);
+            var purchaseOrder = _domainService.CreatePurchaseOrder(request.IssueDate, request.NumberGenerationMethod);
 
             // Add items
             foreach (var item in request.Items)

@@ -25,17 +25,17 @@ public class ShippingOrderCreatedConsumer : IConsumer<ShippingOrderCreatedIntegr
 
         _logger.LogInformation(
             "Received ShippingOrderCreatedIntegrationEvent for PO: {PONumber}",
-            message.ReferencedPurchaseOrderNumber);
+            message.PurchaseOrderNumber);
 
         try
         {
             // Get PO and update state
-            var poNumber = new PurchaseOrderNumber(message.ReferencedPurchaseOrderNumber);
+            var poNumber = new PurchaseOrderNumber(message.PurchaseOrderNumber);
             var po = await _repository.GetByNumberAsync(poNumber);
 
             if (po == null)
             {
-                _logger.LogWarning("PO {PONumber} not found", message.ReferencedPurchaseOrderNumber);
+                _logger.LogWarning("PO {PONumber} not found", message.PurchaseOrderNumber);
                 return;
             }
 
@@ -47,13 +47,13 @@ public class ShippingOrderCreatedConsumer : IConsumer<ShippingOrderCreatedIntegr
 
                 _logger.LogInformation(
                     "Updated PO {PONumber} to BeingShipped state",
-                    message.ReferencedPurchaseOrderNumber);
+                    message.PurchaseOrderNumber);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing ShippingOrderCreatedIntegrationEvent for PO: {PONumber}",
-                message.ReferencedPurchaseOrderNumber);
+                message.PurchaseOrderNumber);
             throw; // Will trigger retry
         }
     }

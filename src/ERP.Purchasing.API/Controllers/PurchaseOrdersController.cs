@@ -93,7 +93,7 @@ public class PurchaseOrdersController : ControllerBase
 
     [HttpGet("recent")]
     [ProducesResponseType(typeof(List<PurchaseOrderDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<PurchaseOrderDto>>> GetRecent([FromQuery] int count = 7)
+    public async Task<ActionResult<List<PurchaseOrderDto>>> GetRecent(int count = 7)
     {
         try
         {
@@ -111,7 +111,7 @@ public class PurchaseOrdersController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(PurchaseOrderDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PurchaseOrderDto>> Create([FromBody] CreatePurchaseOrderCommand command)
+    public async Task<ActionResult<PurchaseOrderDto>> Create(CreatePurchaseOrderCommand command)
     {
         try
         {
@@ -133,7 +133,7 @@ public class PurchaseOrdersController : ControllerBase
     [HttpPost("batch")]
     [ProducesResponseType(typeof(List<PurchaseOrderDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<List<PurchaseOrderDto>>> CreateMultiple([FromBody] CreateMultiplePurchaseOrdersCommand command)
+    public async Task<ActionResult<List<PurchaseOrderDto>>> CreateMultiple(CreateMultiplePurchaseOrdersCommand command)
     {
         try
         {

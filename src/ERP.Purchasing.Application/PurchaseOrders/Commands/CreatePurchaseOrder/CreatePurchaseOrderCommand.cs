@@ -5,7 +5,7 @@ using MediatR;
 namespace ERP.Purchasing.Application.PurchaseOrders.Commands.CreatePurchaseOrder;
 public record CreatePurchaseOrderCommand : IRequest<PurchaseOrderDto>
 {
-    public DateTime IssueDate { get; }
-    public List<CreatePurchaseOrderItemDto> Items { get; }
-    public DocumentNumberGenerationMethod NumberGenerationStrategy { get; } = DocumentNumberGenerationMethod.Timestamp;
+    public DateTime IssueDate { get; set; }
+    public List<CreatePurchaseOrderItemDto> Items { get; set; }
+    public DocumentNumberGenerationMethod NumberGenerationMethod { get; set; } = DocumentNumberGenerationMethod.Timestamp;
 }

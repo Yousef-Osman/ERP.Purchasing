@@ -29,22 +29,20 @@ public class PurchaseOrderApprovedEventHandler : IDomainEventHandler<PurchaseOrd
                 "Handling PurchaseOrderApprovedEvent for PO: {PONumber}",
                 domainEvent.PurchaseOrderNumber);
 
-            // Get full PO details
-            var po = await _repository.GetByIdAsync(domainEvent.PurchaseOrderId);
-            if (po == null)
+            var purchaseOrder = await _repository.GetByIdAsync(domainEvent.PurchaseOrderId);
+            if (purchaseOrder == null)
             {
                 _logger.LogWarning("PO {POId} not found", domainEvent.PurchaseOrderId);
                 return;
             }
 
-            // Create integration event
             var integrationEvent = new PurchaseOrderApprovedIntegrationEvent(
-                po.Id,
-                po.Number.Value,
-                po.IssueDate,
-                po.TotalPrice.Amount,
-                po.TotalPrice.Currency,
-                po.Items.Select(i => new PurchaseOrderItemDto
+                purchaseOrder.Id,
+                purchaseOrder.Number.Value,
+                purchaseOrder.IssueDate,
+                purchaseOrder.TotalPrice.Amount,
+                purchaseOrder.TotalPrice.Currency,
+                purchaseOrder.Items.Select(i => new PurchaseOrderItemDto
                 {
                     GoodCode = i.GoodCode.Value,
                     Price = i.Price.Amount,
@@ -52,7 +50,6 @@ public class PurchaseOrderApprovedEventHandler : IDomainEventHandler<PurchaseOrd
                 }).ToList()
             );
 
-            // Publish to message broker
             await _integrationEventPublisher.PublishAsync(integrationEvent, cancellationToken);
 
             _logger.LogInformation(
@@ -61,8 +58,7 @@ public class PurchaseOrderApprovedEventHandler : IDomainEventHandler<PurchaseOrd
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error publishing integration event for PO: {PONumber}",
-                domainEvent.PurchaseOrderNumber);
+            _logger.LogError(ex, "Error publishing integration event for PO: {PONumber}", domainEvent.PurchaseOrderNumber);
             // Don't throw - integration events should not break domain operations
         }
     }
