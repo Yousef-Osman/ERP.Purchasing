@@ -19,6 +19,8 @@ public class PurchaseOrderClosedEventHandler : IDomainEventHandler<PurchaseOrder
             domainEvent.PurchaseOrderNumber,
             domainEvent.OccurredOn);
 
+        // Add notification logic if needed
+
         await Task.CompletedTask;
     }
 }
