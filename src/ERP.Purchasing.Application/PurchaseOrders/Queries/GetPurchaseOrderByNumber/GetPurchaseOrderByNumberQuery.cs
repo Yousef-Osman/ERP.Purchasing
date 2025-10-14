@@ -2,7 +2,4 @@
 using MediatR;
 
 namespace ERP.Purchasing.Application.PurchaseOrders.Queries.GetPurchaseOrderByNumber;
-public record GetPurchaseOrderByNumberQuery : IRequest<PurchaseOrderDto>
-{
-    public string Number { get; set; }
-}
+public record GetPurchaseOrderByNumberQuery(string Number) : IRequest<PurchaseOrderDto>;

@@ -1,4 +1,6 @@
-﻿using ERP.Purchasing.Application.Common.Interfaces;
+﻿using System.Linq;
+using ERP.Purchasing.Application.Common.Interfaces;
+using ERP.Purchasing.Application.Common.Models;
 using ERP.Purchasing.Domain.PurchaseOrderAggregate;
 using ERP.Purchasing.Domain.PurchaseOrderAggregate.Enums;
 using ERP.Purchasing.Domain.PurchaseOrderAggregate.ValueObjects;
@@ -20,7 +22,6 @@ public class PurchaseOrderRepository : GenericRepository<PurchaseOrderEntity>, I
         var entity = await _dbSet
             .Include(po => po.Items)
             .FirstOrDefaultAsync(po => po.Id == id);
-
         return PurchaseOrderMapper.ToDomain(entity);
     }
 
@@ -29,48 +30,64 @@ public class PurchaseOrderRepository : GenericRepository<PurchaseOrderEntity>, I
         var entity = await _dbSet
             .Include(po => po.Items)
             .FirstOrDefaultAsync(po => po.Number == number.Value);
-
         return PurchaseOrderMapper.ToDomain(entity);
     }
 
-    // SIMPLIFIED: Direct query methods instead of specifications
-    public async Task<IEnumerable<PurchaseOrder>> GetAllAsync(
-        PurchaseOrderState? state = null,
-        bool? isActive = null,
-        DateTime? fromDate = null,
-        DateTime? toDate = null,
-        int? skip = null,
-        int? take = null)
+    public async Task<QueryResult<PurchaseOrder>> GetAllAsync(PurchaseOrderQueryParams queryParams)
     {
-        IQueryable<PurchaseOrderEntity> query = _dbSet
-            .Include(po => po.Items)
-            .AsNoTracking();
+        IQueryable<PurchaseOrderEntity> query = _dbSet.AsNoTracking();
 
         // Apply filters
-        if (state.HasValue)
-            query = query.Where(po => po.State == (int)state.Value);
+        if (queryParams.State.HasValue)
+            query = query.Where(po => po.State == (int)queryParams.State.Value);
 
-        if (isActive.HasValue)
-            query = query.Where(po => po.IsActive == isActive.Value);
+        if (queryParams.IsActive.HasValue)
+            query = query.Where(po => po.IsActive == queryParams.IsActive.Value);
 
-        if (fromDate.HasValue)
-            query = query.Where(po => po.IssueDate >= fromDate.Value);
+        if (queryParams.FromDate.HasValue)
+            query = query.Where(po => po.IssueDate >= queryParams.FromDate.Value);
 
-        if (toDate.HasValue)
-            query = query.Where(po => po.IssueDate <= toDate.Value);
+        if (queryParams.ToDate.HasValue)
+            query = query.Where(po => po.IssueDate <= queryParams.ToDate.Value);
 
-        // Order by date descending
-        query = query.OrderByDescending(po => po.IssueDate);
+        if (!string.IsNullOrWhiteSpace(queryParams.SearchTerm))
+        {
+            var searchTerm = queryParams.SearchTerm.ToLower();
+            query = query.Where(po =>
+                po.Number.ToLower().Contains(searchTerm) ||
+                po.Items.Any(i => i.GoodCode.ToLower().Contains(searchTerm)));
+        }
+
+        // Get total count
+        var totalCount = await query.CountAsync();
+
+        // Apply sorting
+        query = queryParams.SortBy.ToLower() switch
+        {
+            "number" => queryParams.SortDescending
+                ? query.OrderByDescending(po => po.Number)
+                : query.OrderBy(po => po.Number),
+            "totalprice" => queryParams.SortDescending
+                ? query.OrderByDescending(po => po.TotalPrice)
+                : query.OrderBy(po => po.TotalPrice),
+            "state" => queryParams.SortDescending
+                ? query.OrderByDescending(po => po.State)
+                : query.OrderBy(po => po.State),
+            _ => queryParams.SortDescending
+                ? query.OrderByDescending(po => po.IssueDate)
+                : query.OrderBy(po => po.IssueDate)
+        };
 
         // Apply pagination
-        if (skip.HasValue)
-            query = query.Skip(skip.Value);
+        var entities = await query
+            .Skip(queryParams.Skip)
+            .Take(queryParams.Take)
+            .Include(po => po.Items)
+            .ToListAsync();
 
-        if (take.HasValue)
-            query = query.Take(take.Value);
+        var items = entities.Select(PurchaseOrderMapper.ToDomain);
 
-        var entities = await query.ToListAsync();
-        return entities.Select(PurchaseOrderMapper.ToDomain).ToList();
+        return new QueryResult<PurchaseOrder>(items, totalCount);
     }
 
     public async Task<IEnumerable<PurchaseOrder>> GetRecentAsync(int count = 7)
@@ -81,8 +98,7 @@ public class PurchaseOrderRepository : GenericRepository<PurchaseOrderEntity>, I
             .OrderByDescending(po => po.IssueDate)
             .Take(count)
             .ToListAsync();
-
-        return entities.Select(PurchaseOrderMapper.ToDomain).ToList();
+        return entities.Select(PurchaseOrderMapper.ToDomain);
     }
 
     public async Task<IEnumerable<PurchaseOrder>> GetActiveAsync()
@@ -93,8 +109,7 @@ public class PurchaseOrderRepository : GenericRepository<PurchaseOrderEntity>, I
             .Where(po => po.IsActive)
             .OrderByDescending(po => po.IssueDate)
             .ToListAsync();
-
-        return entities.Select(PurchaseOrderMapper.ToDomain).ToList();
+        return entities.Select(PurchaseOrderMapper.ToDomain);
     }
 
     public async Task<IEnumerable<PurchaseOrder>> GetByStateAsync(PurchaseOrderState state)
@@ -105,8 +120,7 @@ public class PurchaseOrderRepository : GenericRepository<PurchaseOrderEntity>, I
             .Where(po => po.State == (int)state)
             .OrderByDescending(po => po.IssueDate)
             .ToListAsync();
-
-        return entities.Select(PurchaseOrderMapper.ToDomain).ToList();
+        return entities.Select(PurchaseOrderMapper.ToDomain);
     }
 
     public async Task AddAsync(PurchaseOrder purchaseOrder)
@@ -117,7 +131,7 @@ public class PurchaseOrderRepository : GenericRepository<PurchaseOrderEntity>, I
 
     public async Task AddRangeAsync(IEnumerable<PurchaseOrder> purchaseOrders)
     {
-        var entities = purchaseOrders.Select(PurchaseOrderMapper.ToEntity).ToList();
+        var entities = purchaseOrders.Select(PurchaseOrderMapper.ToEntity);
         await base.AddRangeAsync(entities);
     }
 
@@ -137,9 +151,7 @@ public class PurchaseOrderRepository : GenericRepository<PurchaseOrderEntity>, I
     {
         var entity = await _dbSet.FirstOrDefaultAsync(po => po.Id == purchaseOrder.Id);
         if (entity != null)
-        {
             base.Remove(entity);
-        }
     }
 
     public async Task<int> SaveChangesAsync()

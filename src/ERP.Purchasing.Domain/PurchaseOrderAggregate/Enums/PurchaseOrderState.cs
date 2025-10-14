@@ -1,10 +1,8 @@
 ﻿namespace ERP.Purchasing.Domain.PurchaseOrderAggregate.Enums;
 public enum PurchaseOrderState
 {
-    Created,
-    Approved,
-    BeingShipped,
-    Shipped,
-    Closed,
-    Deactivated
+    Created = 1,
+    Approved = 2,
+    BeingShipped = 3,
+    Closed = 4
 }

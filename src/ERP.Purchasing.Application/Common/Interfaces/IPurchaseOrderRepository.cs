@@ -1,20 +1,14 @@
-﻿using ERP.Purchasing.Domain.PurchaseOrderAggregate;
+﻿using ERP.Purchasing.Application.Common.Models;
+using ERP.Purchasing.Domain.PurchaseOrderAggregate;
 using ERP.Purchasing.Domain.PurchaseOrderAggregate.Enums;
 using ERP.Purchasing.Domain.PurchaseOrderAggregate.ValueObjects;
 
 namespace ERP.Purchasing.Application.Common.Interfaces;
-public interface IPurchaseOrderRepository: IGenericRepository<PurchaseOrder>
+public interface IPurchaseOrderRepository
 {
     Task<PurchaseOrder> GetByIdAsync(Guid id);
     Task<PurchaseOrder> GetByNumberAsync(PurchaseOrderNumber number);
-    Task<IEnumerable<PurchaseOrder>> GetAllAsync(
-        PurchaseOrderState? state = null,
-        bool? isActive = null,
-        DateTime? fromDate = null,
-        DateTime? toDate = null,
-        int? skip = null,
-        int? take = null);
-
+    Task<QueryResult<PurchaseOrder>> GetAllAsync(PurchaseOrderQueryParams queryParams);
     Task<IEnumerable<PurchaseOrder>> GetRecentAsync(int count = 7);
     Task<IEnumerable<PurchaseOrder>> GetActiveAsync();
     Task<IEnumerable<PurchaseOrder>> GetByStateAsync(PurchaseOrderState state);

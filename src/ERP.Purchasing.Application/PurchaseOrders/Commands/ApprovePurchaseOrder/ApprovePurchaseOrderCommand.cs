@@ -2,7 +2,4 @@
 using MediatR;
 
 namespace ERP.Purchasing.Application.PurchaseOrders.Commands.ApprovePurchaseOrder;
-public record ApprovePurchaseOrderCommand : IRequest<PurchaseOrderDto>
-{
-    public Guid PurchaseOrderId { get; set; }
-}
+public record ApprovePurchaseOrderCommand(Guid PurchaseOrderId) : IRequest<PurchaseOrderDto>;

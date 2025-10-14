@@ -1,5 +1,5 @@
-﻿using ERP.Purchasing.Application.Common.Interfaces;
-using ERP.Purchasing.Infrastructure.Persistence;
+﻿using ERP.Purchasing.Infrastructure.Persistence;
+using ERP.SharedKernel.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;

@@ -1,9 +1,9 @@
 ﻿using ERP.Purchasing.Application.Common.DTOs;
 using ERP.Purchasing.Application.Common.Interfaces;
 using ERP.Purchasing.Application.Common.Mappers;
-using ERP.Purchasing.Domain.PurchaseOrderAggregate.Factories;
 using ERP.Purchasing.Domain.PurchaseOrderAggregate.Services;
 using ERP.Purchasing.Domain.PurchaseOrderAggregate.ValueObjects;
+using ERP.SharedKernel.Factories;
 using ERP.SharedKernel.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -11,19 +11,22 @@ using Microsoft.Extensions.Logging;
 namespace ERP.Purchasing.Application.PurchaseOrders.Commands.CreatePurchaseOrder;
 public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseOrderCommand, PurchaseOrderDto>
 {
+    private readonly PurchaseOrderDomainService _domainService;
     private readonly IPurchaseOrderRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IPurchaseOrderNumberGeneratorFactory _numberFactory;
+    private readonly IDocumentNumberGeneratorFactory _numberFactory;
     private readonly IDomainEventDispatcher _eventDispatcher;
     private readonly ILogger<CreatePurchaseOrderCommandHandler> _logger;
 
     public CreatePurchaseOrderCommandHandler(
+        PurchaseOrderDomainService domainService,
         IPurchaseOrderRepository repository,
         IUnitOfWork unitOfWork,
-        IPurchaseOrderNumberGeneratorFactory numberFactory,
+        IDocumentNumberGeneratorFactory numberFactory,
         IDomainEventDispatcher eventDispatcher,
         ILogger<CreatePurchaseOrderCommandHandler> logger)
     {
+        _domainService = domainService;
         _repository = repository;
         _unitOfWork = unitOfWork;
         _numberFactory = numberFactory;
@@ -37,32 +40,26 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
         {
             _logger.LogInformation("Creating new purchase order");
 
-            var domainService = new PurchaseOrderDomainService(_numberFactory);
-
             // Create purchase order
-            var po = domainService.CreatePurchaseOrder(
-                request.IssueDate,
-                request.NumberGenerationStrategy);
+            var purchaseOrder = _domainService.CreatePurchaseOrder(request.IssueDate, request.NumberGenerationStrategy);
 
             // Add items
             foreach (var item in request.Items)
             {
-                po.AddItem(
-                    new GoodCode(item.GoodCode),
-                    new Money(item.Price, item.Currency));
+                purchaseOrder.AddItem(new GoodCode(item.GoodCode), new Money(item.Price, item.Currency));
             }
 
             // Save
-            await _repository.AddAsync(po);
+            await _repository.AddAsync(purchaseOrder);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // Dispatch events
-            await _eventDispatcher.DispatchAsync(po.DomainEvents, cancellationToken);
-            po.ClearDomainEvents();
+            await _eventDispatcher.DispatchAsync(purchaseOrder.DomainEvents, cancellationToken);
+            purchaseOrder.ClearDomainEvents();
 
-            _logger.LogInformation("Created purchase order: {Number}", po.Number.Value);
+            _logger.LogInformation("Created purchase order: {Number}", purchaseOrder.Number.Value);
 
-            return PurchaseOrderMapper.ToDto(po);
+            return PurchaseOrderMapper.ToDto(purchaseOrder);
         }
         catch (Exception ex)
         {

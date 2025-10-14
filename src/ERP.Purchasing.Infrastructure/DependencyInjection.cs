@@ -1,8 +1,8 @@
 ﻿using ERP.Purchasing.Application.Common.Interfaces;
-using ERP.Purchasing.Domain.PurchaseOrderAggregate.Factories;
 using ERP.Purchasing.Infrastructure.Persistence;
 using ERP.Purchasing.Infrastructure.Persistence.Repositories;
 using ERP.Purchasing.Infrastructure.Services;
+using ERP.SharedKernel.Factories;
 using ERP.SharedKernel.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -22,7 +22,7 @@ public static class DependencyInjection
 
         // Domain Services
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
-        services.AddSingleton<IPurchaseOrderNumberGeneratorFactory, PurchaseOrderNumberGeneratorFactory>();
+        services.AddSingleton<IDocumentNumberGeneratorFactory, DocumentNumberGeneratorFactory>();
 
         return services;
     }

@@ -1,5 +1,5 @@
-﻿using ERP.Purchasing.Application.Common.Interfaces;
-using ERP.Purchasing.Infrastructure.Persistence;
+﻿using ERP.Purchasing.Infrastructure.Persistence;
+using ERP.SharedKernel.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace ERP.Purchasing.Infrastructure.Services;

@@ -1,13 +1,15 @@
 ﻿using ERP.Purchasing.Application.Common.DTOs;
 using ERP.Purchasing.Application.Common.Interfaces;
 using ERP.Purchasing.Application.Common.Mappers;
-using ERP.Purchasing.Domain.PurchaseOrderAggregate.Specifications;
+using ERP.Purchasing.Application.Common.Models;
+using ERP.SharedKernel.Enums;
+using ERP.SharedKernel.Pagination;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace ERP.Purchasing.Application.PurchaseOrders.Queries.GetAllPurchaseOrders;
 public class GetAllPurchaseOrdersQueryHandler
-        : IRequestHandler<GetAllPurchaseOrdersQuery, List<PurchaseOrderDto>>
+        : IRequestHandler<GetAllPurchaseOrdersQuery, PagedResult<PurchaseOrderDto>>
 {
     private readonly IPurchaseOrderRepository _repository;
     private readonly ILogger<GetAllPurchaseOrdersQueryHandler> _logger;
@@ -20,38 +22,38 @@ public class GetAllPurchaseOrdersQueryHandler
         _logger = logger;
     }
 
-    public async Task<List<PurchaseOrderDto>> Handle(
+    public async Task<PagedResult<PurchaseOrderDto>> Handle(
         GetAllPurchaseOrdersQuery request,
         CancellationToken cancellationToken)
     {
         try
         {
-            _logger.LogInformation("Getting all purchase orders with filters");
+            var req = request.Request;
 
-            // Calculate skip/take from page number/size
-            int? skip = null;
-            int? take = null;
+            _logger.LogInformation("Getting purchase orders - Page: {PageNumber}, Size: {PageSize}", req.PageNumber, req.PageSize);
 
-            if (request.PageNumber.HasValue && request.PageSize.HasValue)
+            // Map to domain query params
+            var queryParams = new PurchaseOrderQueryParams
             {
-                skip = (request.PageNumber.Value - 1) * request.PageSize.Value;
-                take = request.PageSize.Value;
-            }
+                State = req.State,
+                IsActive = req.IsActive,
+                FromDate = req.FromDate,
+                ToDate = req.ToDate,
+                SearchTerm = req.SearchTerm,
+                SortBy = req.SortBy,
+                SortDescending = req.SortDirection == SortDirection.Descending,
+                Skip = (req.PageNumber - 1) * req.PageSize,
+                Take = req.PageSize
+            };
 
-            // Direct call to repository with parameters
-            var pos = await _repository.GetAllAsync(
-                state: request.State,
-                isActive: request.IsActive,
-                fromDate: request.FromDate,
-                toDate: request.ToDate,
-                skip: skip,
-                take: take);
+            var result = await _repository.GetAllAsync(queryParams);
+            var dtos = result.Items.Select(PurchaseOrderMapper.ToDto).ToList();
 
-            return pos.Select(PurchaseOrderMapper.ToDto).ToList();
+            return new PagedResult<PurchaseOrderDto>(dtos, result.TotalCount, req.PageNumber, req.PageSize);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting all purchase orders");
+            _logger.LogError(ex, "Error getting purchase orders");
             throw;
         }
     }

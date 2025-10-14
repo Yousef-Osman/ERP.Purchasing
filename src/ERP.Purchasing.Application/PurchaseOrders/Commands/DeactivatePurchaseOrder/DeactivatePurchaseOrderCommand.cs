@@ -2,7 +2,5 @@
 using MediatR;
 
 namespace ERP.Purchasing.Application.PurchaseOrders.Commands.DeactivatePurchaseOrder;
-public record DeactivatePurchaseOrderCommand : IRequest<PurchaseOrderDto>
-{
-    public Guid PurchaseOrderId { get; set; }
-}
+public record DeactivatePurchaseOrderCommand(Guid PurchaseOrderId)
+    : IRequest<PurchaseOrderDto>;

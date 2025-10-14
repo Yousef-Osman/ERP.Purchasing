@@ -1,6 +1,8 @@
 ﻿using ERP.Purchasing.Application.Common.DTOs;
 using ERP.Purchasing.Application.Common.Interfaces;
 using ERP.Purchasing.Application.Common.Mappers;
+using ERP.Purchasing.Domain.PurchaseOrderAggregate;
+using ERP.SharedKernel.Exceptions;
 using ERP.SharedKernel.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -34,19 +36,22 @@ public class DeactivatePurchaseOrderCommandHandler
         {
             _logger.LogInformation("Deactivating purchase order: {Id}", request.PurchaseOrderId);
 
-            var po = await _repository.GetByIdAsync(request.PurchaseOrderId);
+            var purchaseOrder = await _repository.GetByIdAsync(request.PurchaseOrderId);
 
-            po.Deactivate();
+            if (purchaseOrder == null)
+                throw new EntityNotFoundException(nameof(PurchaseOrder), request.PurchaseOrderId);
 
-            await _repository.UpdateAsync(po);
+            purchaseOrder.Deactivate();
+
+            await _repository.UpdateAsync(purchaseOrder);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            await _eventDispatcher.DispatchAsync(po.DomainEvents, cancellationToken);
-            po.ClearDomainEvents();
+            await _eventDispatcher.DispatchAsync(purchaseOrder.DomainEvents, cancellationToken);
+            purchaseOrder.ClearDomainEvents();
 
-            _logger.LogInformation("Deactivated purchase order: {Number}", po.Number.Value);
+            _logger.LogInformation("Deactivated purchase order: {Number}", purchaseOrder.Number.Value);
 
-            return PurchaseOrderMapper.ToDto(po);
+            return PurchaseOrderMapper.ToDto(purchaseOrder);
         }
         catch (Exception ex)
         {

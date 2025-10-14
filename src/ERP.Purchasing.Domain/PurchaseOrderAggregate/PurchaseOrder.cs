@@ -35,6 +35,9 @@ public class PurchaseOrder : AggregateRoot<Guid>
         if (goodCode == null) throw new ArgumentNullException(nameof(goodCode));
         if (price == null) throw new ArgumentNullException(nameof(price));
 
+        if (!IsActive)
+            throw new InvalidOperationException("Cannot add items to an inactive PO");
+
         if (_items.Any(i => i.GoodCode.Equals(goodCode)))
             throw new InvalidOperationException($"Good {goodCode} already exists in this PO");
 
@@ -47,7 +50,11 @@ public class PurchaseOrder : AggregateRoot<Guid>
 
     public void RemoveItem(GoodCode goodCode)
     {
+        if (!IsActive)
+            throw new InvalidOperationException("Cannot remove items from an inactive PO");
+
         var item = _items.FirstOrDefault(i => i.GoodCode.Equals(goodCode));
+
         if (item == null)
             throw new InvalidOperationException($"Good {goodCode} not found in this PO");
 
@@ -58,6 +65,9 @@ public class PurchaseOrder : AggregateRoot<Guid>
 
     public void UpdateItemPrice(GoodCode goodCode, Money newPrice)
     {
+        if (!IsActive)
+            throw new InvalidOperationException("Cannot update items form an inactive PO");
+
         var item = _items.FirstOrDefault(i => i.GoodCode.Equals(goodCode));
         if (item == null)
             throw new InvalidOperationException($"Good {goodCode} not found in this PO");

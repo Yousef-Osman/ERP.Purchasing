@@ -7,10 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
-
-    builder.Services.AddApplicationServices();
+    builder.Services.AddApplicationServices(builder.Configuration);
     builder.Services.AddInfrastructureServices(builder.Configuration);
 
+    // Add CORS
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowAll", policy =>

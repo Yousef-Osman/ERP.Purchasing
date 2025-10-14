@@ -1,14 +1,18 @@
 ﻿using ERP.Purchasing.API.Moddels;
 using ERP.Purchasing.Application.Common.DTOs;
+using ERP.Purchasing.Application.Common.Requests;
 using ERP.Purchasing.Application.PurchaseOrders.Commands.AddItemToPurchaseOrder;
 using ERP.Purchasing.Application.PurchaseOrders.Commands.ApprovePurchaseOrder;
+using ERP.Purchasing.Application.PurchaseOrders.Commands.CreateMultiplePurchaseOrders;
 using ERP.Purchasing.Application.PurchaseOrders.Commands.CreatePurchaseOrder;
 using ERP.Purchasing.Application.PurchaseOrders.Commands.DeactivatePurchaseOrder;
 using ERP.Purchasing.Application.PurchaseOrders.Commands.UpdateItemPrice;
 using ERP.Purchasing.Application.PurchaseOrders.Queries.GetAllPurchaseOrders;
 using ERP.Purchasing.Application.PurchaseOrders.Queries.GetPurchaseOrderById;
 using ERP.Purchasing.Application.PurchaseOrders.Queries.GetPurchaseOrderByNumber;
-using ERP.Purchasing.Domain.PurchaseOrderAggregate.Enums;
+using ERP.Purchasing.Application.PurchaseOrders.Queries.GetRecentPurchaseOrders;
+using ERP.SharedKernel.Exceptions;
+using ERP.SharedKernel.Pagination;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,10 +21,10 @@ namespace ERP.Purchasing.API.Controllers;
 [ApiController]
 public class PurchaseOrdersController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly ILogger<PurchaseOrdersController> _logger;
 
-    public PurchaseOrdersController(IMediator mediator, ILogger<PurchaseOrdersController> logger)
+    public PurchaseOrdersController(ISender mediator, ILogger<PurchaseOrdersController> logger)
     {
         _mediator = mediator;
         _logger = logger;
@@ -33,7 +37,7 @@ public class PurchaseOrdersController : ControllerBase
     {
         try
         {
-            var query = new GetPurchaseOrderByIdQuery { Id = id };
+            var query = new GetPurchaseOrderByIdQuery(id);
             var result = await _mediator.Send(query);
 
             if (result == null)
@@ -55,7 +59,7 @@ public class PurchaseOrdersController : ControllerBase
     {
         try
         {
-            var query = new GetPurchaseOrderByNumberQuery { Number = number };
+            var query = new GetPurchaseOrderByNumberQuery(number);
             var result = await _mediator.Send(query);
 
             if (result == null)
@@ -71,34 +75,36 @@ public class PurchaseOrdersController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(List<PurchaseOrderDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<PurchaseOrderDto>>> GetAll(
-        [FromQuery] PurchaseOrderState? state = null,
-        [FromQuery] bool? isActive = null,
-        [FromQuery] DateTime? fromDate = null,
-        [FromQuery] DateTime? toDate = null,
-        [FromQuery] int? pageNumber = null,
-        [FromQuery] int? pageSize = null)
+    [ProducesResponseType(typeof(PagedResult<PurchaseOrderDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedResult<PurchaseOrderDto>>> GetAll([FromQuery] PurchaseOrderQueryRequest request)
     {
         try
         {
-            var query = new GetAllPurchaseOrdersQuery
-            {
-                State = state,
-                IsActive = isActive,
-                FromDate = fromDate,
-                ToDate = toDate,
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            };
-
+            var query = new GetAllPurchaseOrdersQuery(request);
             var result = await _mediator.Send(query);
             return Ok(result);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving purchase orders");
+            _logger.LogError(ex, "Error getting purchase orders");
             return StatusCode(500, "An error occurred while retrieving purchase orders");
+        }
+    }
+
+    [HttpGet("recent")]
+    [ProducesResponseType(typeof(List<PurchaseOrderDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<PurchaseOrderDto>>> GetRecent([FromQuery] int count = 7)
+    {
+        try
+        {
+            var query = new GetRecentPurchaseOrdersQuery { Count = count };
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving recent purchase orders");
+            return StatusCode(500, "An error occurred while retrieving recent purchase orders");
         }
     }
 
@@ -112,10 +118,37 @@ public class PurchaseOrdersController : ControllerBase
             var result = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
+        catch (DomainException ex)
+        {
+            _logger.LogWarning(ex, "Domain validation error creating purchase order");
+            return BadRequest(new { error = ex.Message, code = ex.ErrorCode });
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating purchase order");
             return StatusCode(500, "An error occurred while creating the purchase order");
+        }
+    }
+
+    [HttpPost("batch")]
+    [ProducesResponseType(typeof(List<PurchaseOrderDto>), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<List<PurchaseOrderDto>>> CreateMultiple([FromBody] CreateMultiplePurchaseOrdersCommand command)
+    {
+        try
+        {
+            var result = await _mediator.Send(command);
+            return Created("", result);
+        }
+        catch (DomainException ex)
+        {
+            _logger.LogWarning(ex, "Domain validation error creating multiple purchase orders");
+            return BadRequest(new { error = ex.Message, code = ex.ErrorCode });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating multiple purchase orders");
+            return StatusCode(500, "An error occurred while creating purchase orders");
         }
     }
 
@@ -127,9 +160,15 @@ public class PurchaseOrdersController : ControllerBase
     {
         try
         {
-            var command = new ApprovePurchaseOrderCommand { PurchaseOrderId = id };
+            var command = new ApprovePurchaseOrderCommand(id);
+
             var result = await _mediator.Send(command);
             return Ok(result);
+        }
+        catch (EntityNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Purchase order not found: {Id}", id);
+            return NotFound(new { error = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
@@ -150,9 +189,14 @@ public class PurchaseOrdersController : ControllerBase
     {
         try
         {
-            var command = new DeactivatePurchaseOrderCommand { PurchaseOrderId = id };
+            var command = new DeactivatePurchaseOrderCommand(id);
             var result = await _mediator.Send(command);
             return Ok(result);
+        }
+        catch (EntityNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Purchase order not found: {Id}", id);
+            return NotFound(new { error = ex.Message });
         }
         catch (Exception ex)
         {
@@ -176,8 +220,14 @@ public class PurchaseOrdersController : ControllerBase
                 Price = request.Price,
                 Currency = request.Currency
             };
+
             var result = await _mediator.Send(command);
             return Ok(result);
+        }
+        catch (EntityNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Purchase order not found: {Id}", id);
+            return NotFound(new { error = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
@@ -211,6 +261,11 @@ public class PurchaseOrdersController : ControllerBase
             };
             var result = await _mediator.Send(command);
             return Ok(result);
+        }
+        catch (EntityNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Purchase order not found: {Id}", id);
+            return NotFound(new { error = ex.Message });
         }
         catch (InvalidOperationException ex)
         {

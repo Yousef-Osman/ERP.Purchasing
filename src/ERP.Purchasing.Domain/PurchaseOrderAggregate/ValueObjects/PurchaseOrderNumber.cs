@@ -11,6 +11,6 @@ public class PurchaseOrderNumber : DocumentNumber
 
     public static PurchaseOrderNumber Create(IDocumentNumberGenerator generator)
     {
-        return new PurchaseOrderNumber(generator.Generate());
+        return new PurchaseOrderNumber(generator.Generate("PO"));
     }
 }

@@ -15,4 +15,10 @@
     <ProjectReference Include="..\ERP.Purchasing.Infrastructure\ERP.Purchasing.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="ERP.SharedKernel">
+      <HintPath>..\..\..\ERP.Common\ERP.SharedKernel\bin\Debug\net8.0\ERP.SharedKernel.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
