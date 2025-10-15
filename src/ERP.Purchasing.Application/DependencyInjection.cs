@@ -6,8 +6,10 @@ using ERP.Purchasing.Domain.PurchaseOrderAggregate.Services;
 using ERP.SharedKernel.Interfaces;
 using ERP.SharedKernel.Messaging.Configuration;
 using ERP.SharedKernel.Messaging.Publishers;
+using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.FeatureManagement;
 
 namespace ERP.Purchasing.Application;
 public static class DependencyInjection
@@ -36,6 +38,8 @@ public static class DependencyInjection
 
         // Domain Services
         services.AddScoped<PurchaseOrderDomainService>();
+
+        services.AddFeatureManagement();
 
         return services;
     }

@@ -21,17 +21,12 @@ public class GetAllPurchaseOrdersQueryHandler
         _logger = logger;
     }
 
-    public async Task<PagedResult<PurchaseOrderDto>> Handle(
-        GetAllPurchaseOrdersQuery request,
-        CancellationToken cancellationToken)
+    public async Task<PagedResult<PurchaseOrderDto>> Handle(GetAllPurchaseOrdersQuery request, CancellationToken cancellationToken)
     {
         try
         {
             var req = request.Request;
 
-            _logger.LogInformation("Getting purchase orders - Page: {PageNumber}, Size: {PageSize}", req.PageNumber, req.PageSize);
-
-            // Map to domain query params
             var queryParams = new PurchaseOrderQueryParams
             {
                 State = req.State,

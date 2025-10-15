@@ -1,9 +1,12 @@
 ﻿using ERP.Purchasing.Application.Common.Interfaces;
+using ERP.Purchasing.Infrastructure.Behaviors;
+using ERP.Purchasing.Infrastructure.Caching;
 using ERP.Purchasing.Infrastructure.Persistence;
 using ERP.Purchasing.Infrastructure.Persistence.Repositories;
 using ERP.Purchasing.Infrastructure.Services;
 using ERP.SharedKernel.Factories;
 using ERP.SharedKernel.Interfaces;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,9 +23,13 @@ public static class DependencyInjection
         services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // Domain Services
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddSingleton<IDocumentNumberGeneratorFactory, DocumentNumberGeneratorFactory>();
+
+        // Add Validation Behavior
+        //services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+        services.AddRedisCaching(configuration);
 
         return services;
     }

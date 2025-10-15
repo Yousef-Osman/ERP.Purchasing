@@ -19,22 +19,18 @@ public class GetPurchaseOrderByIdQueryHandler
         _logger = logger;
     }
 
-    public async Task<PurchaseOrderDto> Handle(
-        GetPurchaseOrderByIdQuery request,
-        CancellationToken cancellationToken)
+    public async Task<PurchaseOrderDto> Handle(GetPurchaseOrderByIdQuery request, CancellationToken cancellationToken)
     {
         try
         {
-            _logger.LogInformation("Getting purchase order by Id: {Id}", request.Id);
-
-            var po = await _repository.GetByIdAsync(request.Id);
-            if (po == null)
+            var purchaseOrder = await _repository.GetByIdAsync(request.Id);
+            if (purchaseOrder == null)
             {
                 _logger.LogWarning("Purchase order not found: {Id}", request.Id);
                 return null;
             }
 
-            var dto = PurchaseOrderMapper.ToDto(po);
+            var dto = PurchaseOrderMapper.ToDto(purchaseOrder);
 
             return dto;
         }

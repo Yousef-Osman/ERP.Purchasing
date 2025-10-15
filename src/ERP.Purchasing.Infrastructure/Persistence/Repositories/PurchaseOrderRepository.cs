@@ -73,8 +73,8 @@ public class PurchaseOrderRepository : GenericRepository<PurchaseOrderEntity>, I
                 ? query.OrderByDescending(po => po.State)
                 : query.OrderBy(po => po.State),
             _ => queryParams.SortDescending
-                ? query.OrderByDescending(po => po.IssueDate)
-                : query.OrderBy(po => po.IssueDate)
+                ? query.OrderByDescending(po => po.CreatedAt)
+                : query.OrderBy(po => po.CreatedAt)
         };
 
         // Apply pagination

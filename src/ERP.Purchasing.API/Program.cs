@@ -1,5 +1,6 @@
 using ERP.Purchasing.Application;
 using ERP.Purchasing.Infrastructure;
+using ERP.Purchasing.Infrastructure.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -9,6 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddApplicationServices(builder.Configuration);
     builder.Services.AddInfrastructureServices(builder.Configuration);
+
+    builder.Services.AddElasticsearch(builder.Configuration);
+    builder.AddSerilog();
 
     // Add CORS
     builder.Services.AddCors(options =>

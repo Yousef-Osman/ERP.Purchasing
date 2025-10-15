@@ -20,23 +20,20 @@ public class GetPurchaseOrderByNumberQueryHandler
         _logger = logger;
     }
 
-    public async Task<PurchaseOrderDto> Handle(
-        GetPurchaseOrderByNumberQuery request,
-        CancellationToken cancellationToken)
+    public async Task<PurchaseOrderDto> Handle(GetPurchaseOrderByNumberQuery request,CancellationToken cancellationToken)
     {
         try
         {
-            _logger.LogInformation("Getting purchase order by Number: {Number}", request.Number);
+            var poNumber = new PurchaseOrderNumber(request.Number);
+            var purchaseOrder = await _repository.GetByNumberAsync(poNumber);
 
-            var number = new PurchaseOrderNumber(request.Number);
-            var po = await _repository.GetByNumberAsync(number);
-            if (po == null)
+            if (purchaseOrder == null)
             {
                 _logger.LogWarning("Purchase order not found: {Number}", request.Number);
                 return null;
             }
 
-            var dto = PurchaseOrderMapper.ToDto(po);
+            var dto = PurchaseOrderMapper.ToDto(purchaseOrder);
 
             return dto;
         }
