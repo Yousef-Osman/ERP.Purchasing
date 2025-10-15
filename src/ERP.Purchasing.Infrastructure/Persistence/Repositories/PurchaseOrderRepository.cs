@@ -1,6 +1,5 @@
-﻿using System.Linq;
+﻿using ERP.Purchasing.Application.Common.DTOs;
 using ERP.Purchasing.Application.Common.Interfaces;
-using ERP.Purchasing.Application.Common.Models;
 using ERP.Purchasing.Domain.PurchaseOrderAggregate;
 using ERP.Purchasing.Domain.PurchaseOrderAggregate.Enums;
 using ERP.Purchasing.Domain.PurchaseOrderAggregate.ValueObjects;

@@ -1,7 +1,6 @@
 ﻿using ERP.Purchasing.Application.Common.DTOs;
 using ERP.Purchasing.Application.Common.Interfaces;
 using ERP.Purchasing.Application.Common.Mappers;
-using ERP.Purchasing.Application.Common.Models;
 using ERP.SharedKernel.Enums;
 using ERP.SharedKernel.Pagination;
 using MediatR;

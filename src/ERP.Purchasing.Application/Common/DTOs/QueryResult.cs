@@ -1,4 +1,4 @@
-﻿namespace ERP.Purchasing.Application.Common.Models;
+﻿namespace ERP.Purchasing.Application.Common.DTOs;
 public class QueryResult<T>
 {
     public IEnumerable<T> Items { get; set; }

@@ -1,6 +1,6 @@
 ﻿using ERP.Purchasing.Domain.PurchaseOrderAggregate.Enums;
 
-namespace ERP.Purchasing.Application.Common.Models;
+namespace ERP.Purchasing.Application.Common.DTOs;
 public class PurchaseOrderQueryParams
 {
     public PurchaseOrderState? State { get; set; }

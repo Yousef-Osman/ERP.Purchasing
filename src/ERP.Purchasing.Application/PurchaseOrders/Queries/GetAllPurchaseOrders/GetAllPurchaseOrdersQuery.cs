@@ -4,7 +4,7 @@ using ERP.SharedKernel.Pagination;
 using MediatR;
 
 namespace ERP.Purchasing.Application.PurchaseOrders.Queries.GetAllPurchaseOrders;
-public record GetAllPurchaseOrdersQuery : IRequest<PagedResult<PurchaseOrderDto>>
+public class GetAllPurchaseOrdersQuery : IRequest<PagedResult<PurchaseOrderDto>>
 {
     public PurchaseOrderQueryRequest Request { get; }
 

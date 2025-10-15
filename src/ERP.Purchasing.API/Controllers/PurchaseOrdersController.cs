@@ -245,10 +245,7 @@ public class PurchaseOrdersController : ControllerBase
     [ProducesResponseType(typeof(PurchaseOrderDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<PurchaseOrderDto>> UpdateItemPrice(
-        Guid id,
-        string goodCode,
-        [FromBody] UpdatePriceRequest request)
+    public async Task<ActionResult<PurchaseOrderDto>> UpdateItemPrice(Guid id,string goodCode,[FromBody] UpdatePriceRequest request)
     {
         try
         {
