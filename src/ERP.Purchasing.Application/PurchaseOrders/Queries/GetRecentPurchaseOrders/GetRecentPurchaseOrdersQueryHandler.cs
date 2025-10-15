@@ -3,6 +3,7 @@ using ERP.Purchasing.Application.Common.DTOs;
 using ERP.Purchasing.Application.Common.Interfaces;
 using ERP.Purchasing.Application.Common.Mappers;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
 
@@ -13,17 +14,20 @@ public class GetRecentPurchaseOrdersQueryHandler
     private readonly IPurchaseOrderRepository _repository;
     private readonly ICacheService _cacheService;
     private readonly ILogger<GetRecentPurchaseOrdersQueryHandler> _logger;
+    private readonly IConfiguration _configuration;
     private readonly IFeatureManagerSnapshot _featureManager;
 
     public GetRecentPurchaseOrdersQueryHandler(
         IPurchaseOrderRepository repository,
         ICacheService cacheService,
         ILogger<GetRecentPurchaseOrdersQueryHandler> logger,
+        IConfiguration configuration,
         IFeatureManagerSnapshot featureManager)
     {
         _repository = repository;
         _cacheService = cacheService;
         _logger = logger;
+        _configuration = configuration;
         _featureManager = featureManager;
     }
 
@@ -31,7 +35,7 @@ public class GetRecentPurchaseOrdersQueryHandler
     {
         try
         {
-            bool isCachingEnabled = await _featureManager.IsEnabledAsync("UseRedisCaching");
+            bool isCachingEnabled = _configuration.GetValue<bool>("FeatureFlags:UseMessageBroker");
 
             if (isCachingEnabled && request.Count == CacheKeys.PurchaseOrderCacheCount)
             {
